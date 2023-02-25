@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GL/glew.h"
+#include "glad/glad.h"
 #include "glm/glm.hpp"
 
 class World;
@@ -13,8 +13,8 @@ private:
     Shader *shader; // programa shader usado para renderização do terreno
 
     //opengl
-    Gluint vao;     // GL state usado quando terreno estiver sendo renderizado
-    GLuint vbo[4];  // GL vertex buffer object para posição, coordenadas de textura, normais e indices de elemento
+    GLuint vao;     // GL state usado quando terreno estiver sendo renderizado
+    GLuint vbos[3];  // GL vertex buffer object para posição, coordenadas de textura, normais e indices de elemento
 
     //texturas
     //
@@ -34,11 +34,13 @@ public:
     //ctor
     Terrain(World *world,int width, int length, float squareSize, float *heights);
 
+    //dtor
+    ~Terrain();
     //renderiza todo o terreno
     void render(glm::mat4 &projection, glm::mat4 &view, glm::mat4 &model);
 
     //interação
-    float getHeight(glm::vec4 pos); // altura do terreno na posição passado como parametro
+    float getHeight(glm::vec3 pos); // altura do terreno na posição passado como parametro
 
     //raycast
     //sombras

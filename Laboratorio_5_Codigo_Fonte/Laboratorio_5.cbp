@@ -373,15 +373,20 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/objects/player.cpp" />
+		<Unit filename="src/objects/player.h" />
 		<Unit filename="src/shader_fragment.glsl" />
 		<Unit filename="src/shader_vertex.glsl" />
 		<Unit filename="src/stb_image.cpp" />
 		<Unit filename="src/textrendering.cpp" />
 		<Unit filename="src/tiny_obj_loader.cpp" />
+		<Unit filename="src/util/shader.cpp" />
+		<Unit filename="src/util/shader.h" />
+		<Unit filename="src/world/terrain.cpp" />
+		<Unit filename="src/world/terrain.h" />
+		<Unit filename="src/world/world.cpp" />
+		<Unit filename="src/world/world.h" />
 		<Extensions>
-			<code_completion />
-			<envvars />
-			<debugger />
 			<lib_finder disable_auto="1" />
 		</Extensions>
 	</Project>
