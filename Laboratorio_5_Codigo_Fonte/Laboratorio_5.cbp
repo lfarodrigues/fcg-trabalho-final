@@ -378,8 +378,11 @@
 		<Unit filename="src/shader_fragment.glsl" />
 		<Unit filename="src/shader_vertex.glsl" />
 		<Unit filename="src/stb_image.cpp" />
-		<Unit filename="src/textrendering.cpp" />
 		<Unit filename="src/tiny_obj_loader.cpp" />
+		<Unit filename="src/util/loadtexture.cpp" />
+		<Unit filename="src/util/loadtexture.h" />
+		<Unit filename="src/util/lodepng.cpp" />
+		<Unit filename="src/util/lodepng.h" />
 		<Unit filename="src/util/shader.cpp" />
 		<Unit filename="src/util/shader.h" />
 		<Unit filename="src/world/terrain.cpp" />

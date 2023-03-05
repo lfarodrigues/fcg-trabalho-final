@@ -49,6 +49,7 @@ private:
 
 
 public:
+    static const glm::vec3 SUN_DIRECTION;
     //ctor
     World(GLFWwindow *window, glm::vec2 windowSize, std::string worldFile);
 

@@ -1,84 +1,98 @@
 #include "shader.h"
 
 #include "glad/glad.h"
+#include "glm/glm.hpp"
+using namespace glm;
 
 #include <fstream>
 #include <cstdlib>
 #include <iostream>
 #include <string>
+using namespace std;
 
-Shader::Shader(std::string vertex, std::string frag){
+Shader::Shader(string vertex, string frag)
+{
     GLint vertexCompiled;
-    GLint fragmentCompiled;
+    GLint fragCompiled;
 
-    char *vertexFile = textFileRead(vertex.c_str());
-    char *fragFile = textFileRead(frag.c_str());
+	char *vertexFile = textFileRead(vertex.c_str());
+	char *fragFile = textFileRead(frag.c_str());
 
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	// create our separate vertex and fragment shader program
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-    //especifica o codigo fonte para os dois shaders
-    glShaderSource(vertexShader, 1, &vertexFile, NULL);
-    glShaderSource(fragmentShader, 1, &fragFile, NULL);
+    // specify source code for the vertex and shader programs
+	glShaderSource(vertexShader, 1, &vertexFile, NULL);
+	glShaderSource(fragmentShader, 1, &fragFile, NULL);
 
-    //compila o vertex shader
+	// compile the vertex shader and check for errors
     glCompileShader(vertexShader);
-    glGetShaderiv(vertexShader,GL_COMPILE_STATUS, &vertexCompiled);
-
-    if(!vertexCompiled){
-        std::cout << "Shader:Shader() could not compile vertex shader " << vertex << std::endl;
-        printShaderLogInfo(vertexShader);
-        exit(1);
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertexCompiled);
+    if(!vertexCompiled)
+    {
+		cout << "Shader::Shader() could not compile vertex shader " << vertex << endl;
+		printShaderLogInfo(vertexShader);
+		exit(1);
     }
 
-    //compila o fragment shader
+    // compile the fragment shader and check for errors
     glCompileShader(fragmentShader);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragmentCompiled);
-
-    if(!fragmentCompiled){
-        std::cout << "Shader::Shader() could not compile the fragment shader " << frag << std::endl;
-        printShaderLogInfo(fragmentShader);
-        exit(1);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragCompiled);
+    if(!fragCompiled)
+    {
+		cout << "Shader::Shader() could not compile fragment shader " << frag << endl;
+		printShaderLogInfo(fragmentShader);
+		exit(1);
     }
 
-    if(vertexCompiled && fragmentCompiled){
+    // if we compiled successfully, bind them together into our final shader program
+    // that we activate when we want to render with it
+    if(vertexCompiled && fragCompiled)
+    {
         program = glCreateProgram();
         glAttachShader(program, vertexShader);
         glAttachShader(program, fragmentShader);
     }
 }
 
-Shader::~Shader(){
-    glDetachShader(program, vertexShader);
-    glDetachShader(program, fragmentShader);
+Shader::~Shader()
+{
+	glDetachShader(program, vertexShader);
+	glDetachShader(program, fragmentShader);
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     glDeleteProgram(program);
 }
 
-void Shader::link(){
-    GLint linked = false;
+void Shader::link()
+{
+	GLint linked = false;
 
-    glLinkProgram(program);
-    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+	glLinkProgram(program);
+	glGetProgramiv(program, GL_LINK_STATUS, &linked);
 
-    if(!linked){
-        std::cerr << "Shader::Shader() compiled but could not be linked" << std::endl;
-        printShaderLogInfo(vertexShader);
-        printShaderLogInfo(fragmentShader);
-        exit(1);
-    }
+	if(!linked)
+	{
+		cerr << "Shader::Shader() compiled but could not be linked" << endl;
+		printShaderLogInfo(vertexShader);
+		printShaderLogInfo(fragmentShader);
+		exit(1);
+	}
 }
 
-void Shader::bind(){
-    glUseProgram(program);
+void Shader::bind()
+{
+	glUseProgram(program);
 }
 
-void Shader::unbind(){
+void Shader::unbind()
+{
     glUseProgram(0);
 }
 
-void Shader::bindAttrib(const char* var, unsigned int index){
+void Shader::bindAttrib(const char *var, unsigned int index)
+{
     glBindAttribLocation(program, index, var);
 }
 
@@ -107,7 +121,7 @@ void Shader::uniform2fv(const char *var, int count, float *vals)
     glUniform2fv(getUniLoc(program, var), count, vals);
 }
 
-void Shader::uniformVec2(const char *var, glm::vec2 v)
+void Shader::uniformVec2(const char *var, vec2 v)
 {
     uniform2f(var, v.x, v.y);
 }
@@ -127,7 +141,7 @@ void Shader::uniform3f(const char *var, const float v1, const float v2, const fl
     glUniform3f(getUniLoc(program, var), v1, v2, v3);
 }
 
-void Shader::uniformVec3(const char *var, glm::vec3 v)
+void Shader::uniformVec3(const char *var, vec3 v)
 {
     uniform3f(var, v.x, v.y, v.z);
 }
@@ -152,7 +166,7 @@ void Shader::uniform4f(const char *var, float v1, float v2, float v3, float v4)
     glUniform4f(getUniLoc(program, var), v1, v2, v3, v4);
 }
 
-void Shader::uniformVec4(const char *var, glm::vec4 v)
+void Shader::uniformVec4(const char *var, vec4 v)
 {
     uniform4f(var, v.x, v.y, v.z, v.w);
 }
@@ -162,58 +176,67 @@ void Shader::uniformMatrix4fv(const char *var, GLsizei count, GLfloat *vals, boo
     glUniformMatrix4fv(getUniLoc(program, var), count, transpose, vals);
 }
 
-GLint Shader::getUniLoc(GLuint program, const char *name){
+GLint Shader::getUniLoc(GLuint program, const char *name)
+{
     GLint loc;
-
     loc = glGetUniformLocation(program, name);
 
-    if(loc == -1){
-        std::cerr << "Shader::getUniLoc(): uniform '" << name << "' has not been defined" << std::endl;
-    }
+	if(loc == -1)
+	{
+		cerr << "Shader::getUniLoc(): uniform '" << name << "' has not been defined" << endl;
+	}
 
     return loc;
 }
 
-void Shader::printShaderLogInfo(GLuint obj){
-    int infoLogLength = 0;
-    int charsWritten = 0;
+void Shader::printShaderLogInfo(GLuint obj)
+{
+    int infologLength = 0;
+    int charsWritten  = 0;
     char *infoLog;
 
-    glGetShaderiv(obj, GL_INFO_LOG_LENGTH, & infoLogLength);
+	glGetShaderiv(obj, GL_INFO_LOG_LENGTH,&infologLength);
 
-    if(infoLogLength > 1){
-        infoLog = (char*)malloc(infoLogLength);
-        glGetShaderInfoLog(obj, infoLogLength, &charsWritten, infoLog);
-        std::cout << infoLog << std::endl;
-        free(infoLog);
-    }
+	if (infologLength > 1)
+	{
+		infoLog = (char *)malloc(infologLength);
+		glGetShaderInfoLog(obj, infologLength, &charsWritten, infoLog);
+		cout << infoLog << endl;
+		free(infoLog);
+	}
+
 }
 
-char *Shader::textFileRead(const char *fn){
-    FILE *fp;
-    char *content = NULL;
+char *Shader::textFileRead(const char *fn)
+{
+	FILE *fp;
+	char *content = NULL;
 
-    int count = 0;
+	int count=0;
 
-    if(fn != NULL){
-        fp = fopen(fn, "rt");
-        if(fp != NULL){
-            fseek(fp, 0, SEEK_END);
-            rewind(fp);
+	if (fn != NULL)
+	{
+		fp = fopen(fn,"rt");
+		if (fp != NULL)
+		{
+			fseek(fp, 0, SEEK_END);
+			count = ftell(fp);
+			rewind(fp);
 
-            if(count > 0){
-                content = (char*)malloc(sizeof(char) * (count+1));
-                count = fread(content, sizeof(char), count, fp);
-                content[count] = '\0';
-            }
-            fclose(fp);
-        }
-    }
-    else{
-        std::cerr << "Shader::textFileRead() failed to open '" << fn << "'" << std::endl;
-        exit(1);
-    }
+			if (count > 0)
+			{
+				content = (char*)malloc(sizeof(char) * (count+1));
+				count = fread(content, sizeof(char), count, fp);
+				content[count] = '\0';
+			}
+			fclose(fp);
+		}
+		else
+		{
+			cerr << "Shader::textFileRead() failed to open '" << fn << "'" << endl;
+			exit(1);
+		}
+	}
 
-    return content;
+	return content;
 }
-

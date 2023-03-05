@@ -1,7 +1,7 @@
 #include "world.h"
 #include "terrain.h"
 #include "../objects/player.h"
-
+#include "../util/lodepng.h"
 #include "stb_image.h"
 
 #include "GLFW/glfw3.h"
@@ -14,6 +14,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
+
+using namespace glm;
+
+const glm::vec3 World::SUN_DIRECTION(glm::normalize(vec3(0.288, 1.2, 2.2)));
+
 World::World(GLFWwindow *window, glm::vec2 windowSize, std::string worldFile)
 {
     preparePerspectiveCamera(windowSize);
@@ -43,7 +48,7 @@ void World::createWorld(std::string worldFile){
     const float MAX_TERRAIN_HEIGHT = 800.0f;    // qual o ponto mais alto do terreno?
     const float TERRAIN_TILE_SIZE = 10.0f;      // cada quadrado do terreno possui 10m x 10m
 
-    int width, length, channels;       // numero de quadrados que o mundo possui em largura e comprimento
+    unsigned int width, length, channels;       // numero de quadrados que o mundo possui em largura e comprimento
     unsigned char *data;                        // dados lidos do arquivo de mundo
     unsigned char *dataPtr;
     unsigned char pixelData[4];
@@ -54,39 +59,48 @@ void World::createWorld(std::string worldFile){
     unsigned int i, j;
 
     //constroi o terreno a partir de um arquivo
-    data = stbi_load(worldFile.c_str(), &width, &length, &channels, 3);
+    lodepng_decode32_file(&data, &width, &length, worldFile.c_str());
 
-    dataPtr = data;
-    heights = new float[width * length];
-    heighrPtr = heights;
+    if(data!=NULL){
+        dataPtr = data;
+        heights = new float[width * length];
+        heighrPtr = heights;
 
-    worldSize = glm::vec2(width * TERRAIN_TILE_SIZE, length * TERRAIN_TILE_SIZE);
+        worldSize = glm::vec2(width * TERRAIN_TILE_SIZE, length * TERRAIN_TILE_SIZE);
 
-    for(i = 0; i < length; i++){
-        for(j = 0; j < width; j++){
-            //lê a cor do pixel atual
-            memcpy(pixelData, dataPtr, sizeof(unsigned char) * 4);
-            dataPtr += 4;
+        for(i = 0; i < length; i++){
+            for(j = 0; j < width; j++){
+                //lê a cor do pixel atual
+                memcpy(pixelData, dataPtr, sizeof(unsigned char) * 4);
+                dataPtr += 4;
 
-            //pixels vermelhos dizem a altura do terreno
-            *heighrPtr++ = ((float)pixelData[0] / 255.0) * MAX_TERRAIN_HEIGHT;
+                //pixels vermelhos dizem a altura do terreno
+                *heighrPtr++ = ((float)pixelData[0] / 255.0) * MAX_TERRAIN_HEIGHT;
 
-            //TODO
-            if(pixelData[1] == 255){
-                //pixels verdes indicam a presenca de uma arvore
+                //TODO
+                if(pixelData[1] == 255){
+                    //pixels verdes indicam a presenca de uma arvore
+                }
             }
         }
+
+        //constroi o terreno agora que temos a altura de cada vertice
+        terrain = new Terrain(this, width, length, TERRAIN_TILE_SIZE, heights);
+        if(terrain==NULL){
+            std::cout << "In World::createWorld() - Could not create terrain" << std::endl;
+            exit(1);
+        }
     }
-
-    //constroi o terreno agora que temos a altura de cada vertice
-    terrain = new Terrain(this, width, length, TERRAIN_TILE_SIZE, heights);
-
+    else{
+        std::cout << "In World::createWorld() - Could not load world file" << std::endl;
+        exit(1);
+    }
     delete heights;
     delete[] data;
 }
 
 void World::createPlayer(GLFWwindow *window, glm::vec2 windowSize){
-    const glm::vec3 STARTING_POS(2560.0, 0.0, -2560.0);
+    const glm::vec3 STARTING_POS(2560.0, 500.0, -2560.0);
     player = new Player(window, this, STARTING_POS);
 }
 

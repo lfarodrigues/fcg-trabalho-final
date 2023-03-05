@@ -32,6 +32,8 @@ Player::Player(GLFWwindow *window, World *world, glm::vec3 pos){
     lookAngleX = 0.0;
     lookAngleY = 0.0;
 
+    alive = true;
+
     computeWalkingVectors();
     glfwGetCursorPos(window, &oldMouseX, &oldMouseY);
 }
@@ -42,6 +44,7 @@ Player::~Player(){
 void Player::update(float dt){
     controlMouseInput(dt);
     computeWalkingVectors();
+    controlMoving(dt);
     controlLooking(dt);
 }
 
@@ -62,6 +65,40 @@ void Player::controlMouseInput(float dt){
 
     oldMouseX = mouseX;
     oldMouseY = mouseY;
+}
+
+void Player::controlMoving(float dt) {
+    const float MOVE_SPEED = 100.0;					// velocidade padrao 6.7 m/s
+
+    glm::vec3 targetVelocity;					    // quao rapido queremos se mover
+
+	isMoving = false;
+
+	if(glfwGetKey(window, 'W') == GLFW_PRESS || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT))
+	{
+		targetVelocity += glm::vec3(0.0, 0.0, MOVE_SPEED);
+		isMoving = true;
+	}
+
+	if(glfwGetKey(window, 'A') == GLFW_PRESS)
+	{
+		targetVelocity += glm::vec3(-MOVE_SPEED, 0.0, 0.0);
+		isMoving = true;
+	}
+
+	if(glfwGetKey(window, 'D') == GLFW_PRESS)
+	{
+		targetVelocity += glm::vec3(MOVE_SPEED, 0.0, 0.0);
+		isMoving = true;
+	}
+
+	if(glfwGetKey(window, 'S') == GLFW_PRESS)
+	{
+		targetVelocity += glm::vec3(0.0, 0.0, -MOVE_SPEED);
+		isMoving = true;
+	}
+
+	pos = pos + (forward * targetVelocity.z * dt) + (side * targetVelocity.x * dt);
 }
 
 void Player::controlLooking(float dt){

@@ -42,9 +42,10 @@ private:
     glm::vec3 cameraLook;
 
     //rotinas de atualizacao
-    void controlMouseInput(float dt);           // torna movimentacao do mouse em angulos da camera
-    void computeWalkingVectors();       // computa os vetores usados para movimentacao
-    void controlLooking(float dt);               // coloca limites nos angulos de visao do jogador
+    void controlMouseInput(float dt);       // torna movimentacao do mouse em angulos da camera
+    void computeWalkingVectors();           // computa os vetores usados para movimentacao
+    void controlLooking(float dt);          // coloca limites nos angulos de visao do jogador
+    void controlMoving(float dt);
 
 public:
     static const float PLAYER_HEIGHT;
@@ -67,5 +68,6 @@ public:
     glm::vec3 getCameraSide();
     glm::vec3 getCameraUp();
 
+    bool alive;
     bool getIsMoving();
 };

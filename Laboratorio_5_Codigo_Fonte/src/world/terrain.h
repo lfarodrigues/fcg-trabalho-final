@@ -14,10 +14,13 @@ private:
 
     //opengl
     GLuint vao;     // GL state usado quando terreno estiver sendo renderizado
-    GLuint vbos[3];  // GL vertex buffer object para posição, coordenadas de textura, normais e indices de elemento
+    GLuint vbos[4];  // GL vertex buffer object para posição, coordenadas de textura, normais e indices de elemento
 
     //texturas
-    //
+    GLuint region1Texture;				// the terrain uses and blends together several different textures based
+	GLuint region2Texture;				// on the terrain height to give a somewhat-convincing illusion of realistic
+	GLuint region3Texture;				// grassy hills and mountains
+	GLuint shadowTexture;				// this texture is laid on top of the entire terrain object for low-res, static shadows
 
     //propiedades do terreno
     int width;      // largura do terreno em tiles
