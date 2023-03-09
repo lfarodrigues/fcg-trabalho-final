@@ -379,6 +379,8 @@
 		<Unit filename="src/shader_vertex.glsl" />
 		<Unit filename="src/stb_image.cpp" />
 		<Unit filename="src/tiny_obj_loader.cpp" />
+		<Unit filename="src/util/loadmesh.cpp" />
+		<Unit filename="src/util/loadmesh.h" />
 		<Unit filename="src/util/loadtexture.cpp" />
 		<Unit filename="src/util/loadtexture.h" />
 		<Unit filename="src/util/lodepng.cpp" />

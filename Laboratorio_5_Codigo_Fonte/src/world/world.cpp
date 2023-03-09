@@ -100,7 +100,7 @@ void World::createWorld(std::string worldFile){
 }
 
 void World::createPlayer(GLFWwindow *window, glm::vec2 windowSize){
-    const glm::vec3 STARTING_POS(2560.0, 500.0, -2560.0);
+    const glm::vec3 STARTING_POS(2560.0, 0.0, -2560.0);
     player = new Player(window, this, STARTING_POS);
 }
 
