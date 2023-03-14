@@ -1950,13 +1950,9 @@
 	<fstream>
 	<sstream>
 
-1678297889 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\loadmesh.cpp
-	"loadmesh.h"
-	"tiny_obj_loader.h"
-	<iostream>
-	<string>
+1678627064 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\loadmesh.cpp
 
-1678297899 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\loadmesh.h
+1678566711 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\loadmesh.h
 
 1678030646 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\loadtexture.cpp
 	"loadtexture.h"
@@ -2192,7 +2188,7 @@
 
 1677962677 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\include\glm\gtc\matrix_inverse.inl
 
-1678239346 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\world\world.cpp
+1678631080 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\world\world.cpp
 	"world.h"
 	"terrain.h"
 	"../objects/player.h"
@@ -2207,7 +2203,7 @@
 	<vector>
 	<string>
 
-1678298190 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\player.h
+1678631090 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\player.h
 	"glad/glad.h"
 	"glm/glm.hpp"
 

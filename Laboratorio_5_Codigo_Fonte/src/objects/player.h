@@ -74,7 +74,7 @@ private:
 	Shader *shader;							// shader program
 
 	GLuint vao;								// vertex array object (i.e., GL state) para a arma
-	GLuint vbos[3];							// vertex buffer objects (i.e., vertex, tex coords, normals) para a arma
+	GLuint vbos[4];							// vertex buffer objects (i.e., vertex, tex coords, normals) para a arma
 
 	int numGunVertices;						// numero de vertices necessarios para a chamada de rendering
 	GLuint gunDiffuseMap;					// textura da arma
@@ -83,7 +83,7 @@ private:
 	GLuint gunEmissionMap;					// textura de emissao para os efeitos luminosos da arma (LEDs, etc)
 
     //carregamento de recursos
-    void loadGun();
+    void loadGunAndSetupVBOs();
     void loadTextures();
     void loadShader();
 
@@ -92,7 +92,7 @@ private:
     void computeWalkingVectors();           // computa os vetores usados para movimentacao
     void controlLooking(float dt);          // coloca limites nos angulos de visao do jogador
     void controlMoving(float dt);
-
+    void controlGunBobbing(float dt);
 public:
     static const float PLAYER_HEIGHT;
 
@@ -105,6 +105,8 @@ public:
 
     //chamados externamente pelo mundo do jogo
     void computeCameraOrientation();
+    void computeGunPosition();
+
 
     //getters/setters
     glm::vec3 getPos();

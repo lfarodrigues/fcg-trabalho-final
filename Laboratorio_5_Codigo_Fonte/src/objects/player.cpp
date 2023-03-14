@@ -2,6 +2,8 @@
 #include "../world/world.h"
 #include "../util/shader.h"
 #include "../util/loadmesh.h"
+#include "../util/loadtexture.h"
+#include "tiny_obj_loader.h"
 
 #include <iostream>
 #include <string>
@@ -24,6 +26,8 @@ const float Player::PLAYER_HEIGHT = 1.7; // o quanto a camera esta acima do chao
 
 const float Player::MAX_LOOK_PITCH = M_PI_2 - 0.2;
 
+struct ObjModel;
+
 Player::Player(GLFWwindow *window, World *world, glm::vec3 pos){
     this->window = window;
     this->world = world;
@@ -41,6 +45,11 @@ Player::Player(GLFWwindow *window, World *world, glm::vec3 pos){
 
     alive = true;
 
+    //carrega os assets
+    loadGunAndSetupVBOs();
+    loadTextures();
+    loadShader();
+
     computeWalkingVectors();
     glfwGetCursorPos(window, &oldMouseX, &oldMouseY);
 }
@@ -48,18 +57,151 @@ Player::Player(GLFWwindow *window, World *world, glm::vec3 pos){
 Player::~Player(){
 }
 
-void Player::loadGun(){
+void Player::loadGunAndSetupVBOs(){
+    struct ObjModel model((const char*)"../../mesh/gun.obj");
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
+    std::vector<GLuint> indices;
+    std::vector<float>  model_coefficients;
+    std::vector<float>  normal_coefficients;
+    std::vector<float>  texture_coefficients;
+
+    for (size_t shape = 0; shape < model.shapes.size(); ++shape)
+    {
+        size_t first_index = indices.size();
+        size_t num_triangles = model.shapes[shape].mesh.num_face_vertices.size();
+
+        for (size_t triangle = 0; triangle < num_triangles; ++triangle)
+        {
+            assert(model.shapes[shape].mesh.num_face_vertices[triangle] == 3);
+
+            for (size_t vertex = 0; vertex < 3; ++vertex)
+            {
+                tinyobj::index_t idx = model.shapes[shape].mesh.indices[3*triangle + vertex];
+
+                indices.push_back(first_index + 3*triangle + vertex);
+
+                const float vx = model.attrib.vertices[3*idx.vertex_index + 0];
+                const float vy = model.attrib.vertices[3*idx.vertex_index + 1];
+                const float vz = model.attrib.vertices[3*idx.vertex_index + 2];
+
+                model_coefficients.push_back( vx ); // X
+                model_coefficients.push_back( vy ); // Y
+                model_coefficients.push_back( vz ); // Z
+                model_coefficients.push_back( 1.0f ); // W
+
+                if ( idx.normal_index != -1 )
+                {
+                    const float nx = model.attrib.normals[3*idx.normal_index + 0];
+                    const float ny = model.attrib.normals[3*idx.normal_index + 1];
+                    const float nz = model.attrib.normals[3*idx.normal_index + 2];
+                    normal_coefficients.push_back( nx ); // X
+                    normal_coefficients.push_back( ny ); // Y
+                    normal_coefficients.push_back( nz ); // Z
+                    normal_coefficients.push_back( 0.0f ); // W
+                }
+
+                if ( idx.texcoord_index != -1 )
+                {
+                    const float u = model.attrib.texcoords[2*idx.texcoord_index + 0];
+                    const float v = model.attrib.texcoords[2*idx.texcoord_index + 1];
+                    texture_coefficients.push_back( u );
+                    texture_coefficients.push_back( v );
+                }
+            }
+        }
+        /*
+        size_t last_index = indices.size() - 1;
+
+        SceneObject theobject;
+        theobject.name           = model.shapes[shape].name;
+        theobject.first_index    = first_index; // Primeiro índice
+        theobject.num_indices    = last_index - first_index + 1; // Número de indices
+        theobject.rendering_mode = GL_TRIANGLES;       // Índices correspondem ao tipo de rasterização GL_TRIANGLES.
+        theobject.vertex_array_object_id = vertex_array_object_id;
+
+        g_VirtualScene[model.shapes[shape].name] = theobject;
+        */
+    }
+
+    glGenBuffers(4, vbos);
+    //GLuint VBO_model_coefficients_id;
+    //glGenBuffers(1, &VBO_model_coefficients_id);
+    glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
+    glBufferData(GL_ARRAY_BUFFER, model_coefficients.size() * sizeof(float), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, model_coefficients.size() * sizeof(float), model_coefficients.data());
+    GLuint location = 0;
+    GLint  number_of_dimensions = 4;
+    glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(location);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    if ( !normal_coefficients.empty() )
+    {
+        //GLuint VBO_normal_coefficients_id;
+        //glGenBuffers(1, &VBO_normal_coefficients_id);
+        glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
+        glBufferData(GL_ARRAY_BUFFER, normal_coefficients.size() * sizeof(float), NULL, GL_STATIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, normal_coefficients.size() * sizeof(float), normal_coefficients.data());
+        location = 1; // "(location = 1)" em "shader_vertex.glsl"
+        number_of_dimensions = 4; // vec4 em "shader_vertex.glsl"
+        glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(location);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    if ( !texture_coefficients.empty() )
+    {
+        //GLuint VBO_texture_coefficients_id;
+        //glGenBuffers(1, &VBO_texture_coefficients_id);
+        glBindBuffer(GL_ARRAY_BUFFER, vbos[2]);
+        glBufferData(GL_ARRAY_BUFFER, texture_coefficients.size() * sizeof(float), NULL, GL_STATIC_DRAW);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, texture_coefficients.size() * sizeof(float), texture_coefficients.data());
+        location = 2; // "(location = 1)" em "shader_vertex.glsl"
+        number_of_dimensions = 2; // vec2 em "shader_vertex.glsl"
+        glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(location);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    //GLuint indices_id;
+    //glGenBuffers(1, &indices_id);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[3]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(GLuint), indices.data());
+
+    glBindVertexArray(0);
+
+    numGunVertices = indices.size();
 }
 
 void Player::loadTextures(){
-
+    gunDiffuseMap = loadPNG("../../png/gun-diffuse-map.png");
+    gunNormalMap = loadPNG("../../png/gun-normal-map.png");
+    gunSpecularMap = loadPNG("../../png/gun-specular-map.png");
+    gunEmissionMap = loadPNG("../../png/gun-emission-map.png");
 }
 
 void Player::loadShader(){
-
-
-
+    shader = new Shader("../../shaders/solid-vert.glsl","../../shaders/solid-frag.glsl");
+    shader->bindAttrib("a_Vertex", 0);
+    shader->bindAttrib("a_Normal", 1);
+    shader->bindAttrib("a_TexCoord", 2);
+    shader->link();
+    shader->bind();
+    shader->uniform1i("u_DiffuseMap", 0);
+    shader->uniform1i("u_NormalMap", 1);
+    shader->uniform1i("u_SpecularMap", 2);
+    shader->uniform1i("u_EmissionMap", 3);
+    shader->uniformVec3("u_Sun", World::SUN_DIRECTION);
+    shader->uniformVec3("u_MaterialDiffuse", glm::vec3(1.0,0.95,0.85));
+    shader->uniformVec3("u_MaterialSpecular", glm::vec3(1.0,0.95,0.85));
+    shader->uniform1f("u_SpecularIntensity", 8.0);
+    shader->uniform1f("u_SpecularHardness", 2.0);
+    shader->uniform1f("u_NormalMapStrength", 2.5);
+    shader->unbind();
 }
 
 void Player::update(float dt){
@@ -220,6 +362,32 @@ void Player::computeCameraOrientation(){
     cameraSide = glm::vec3(camera[0]);
     cameraUp = glm::vec3(camera[1]);
     cameraLook = pos + cameraForward;
+}
+
+void Player::controlGunBobbing(float dt){
+    const float GUN_BOB_SPEED = 9.0 * dt;
+
+    if(isMoving){
+        gunWalkBob += GUN_BOB_SPEED;
+        gunWalkBobAmount += sin(gunWalkBob);
+    }
+}
+
+void Player::computeGunPosition(){
+    //posicao da arma à extremidade baixo direita do jogador
+    const glm::vec3 GUN_BASE_OFFSET(0.2, -0.125, 0.25);
+    //controla a forca do efeito 'bobbing'
+    const float GUN_BOB_AMOUNT = 0.006;
+    //controla a forca do recuo
+    const float GUN_RECOIL_MOVE_STRENGTH = 0.6;
+    //controla o offset da animação de reload
+    const float GUN_RELOAD_MOVE_AMOUNT = -0.25;
+
+    //computa a posição base da arma e adiciona o efeito de bobbing, recuo e reload
+    gunPos = (cameraForward * GUN_BASE_OFFSET.z) + (cameraSide * GUN_BASE_OFFSET.x) + (cameraUp * GUN_BASE_OFFSET.y);
+    gunPos += (cameraSide * gunWalkBobAmount * GUN_BOB_AMOUNT) - (cameraUp * abs(gunWalkBobAmount) * GUN_BOB_AMOUNT);
+    gunPos += cameraUp * gunRecoilAmount * GUN_RECOIL_MOVE_STRENGTH;
+    gunPos += cameraUp * gunReloadOffsetAmount * GUN_RELOAD_MOVE_AMOUNT;
 }
 
 void Player::computeWalkingVectors(){

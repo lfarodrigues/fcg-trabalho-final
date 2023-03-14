@@ -120,8 +120,9 @@ void World::update(float dt){
     //atualiza objetos
     player->update(dt);
 
-    //atualiza posicao da camera
+    //atualiza posicao da camera e arma
     player->computeCameraOrientation();
+    player->computeGunPosition();
 
     controlCamera();
 }
@@ -130,7 +131,7 @@ void World::render(){
     glm::mat4 modelMat = glm::mat4(1.0);
     //renderiza tudo
     terrain->render(perspectiveProjection, perspectiveView, modelMat);
-    //player->render(perspectiveProjection, perspectiveView);
+    player->render(perspectiveProjection, perspectiveView);
 }
 
 void World::addGarbageItem(){
