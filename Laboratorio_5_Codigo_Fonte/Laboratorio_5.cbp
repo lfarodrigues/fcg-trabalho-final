@@ -373,6 +373,12 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/objects/drone.cpp" />
+		<Unit filename="src/objects/drone.h" />
+		<Unit filename="src/objects/dronemanager.cpp" />
+		<Unit filename="src/objects/dronemanager.h" />
+		<Unit filename="src/objects/object.cpp" />
+		<Unit filename="src/objects/object.h" />
 		<Unit filename="src/objects/player.cpp" />
 		<Unit filename="src/objects/player.h" />
 		<Unit filename="src/shader_fragment.glsl" />
