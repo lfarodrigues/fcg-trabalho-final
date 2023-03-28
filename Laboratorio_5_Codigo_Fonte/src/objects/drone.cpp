@@ -8,6 +8,9 @@
 
 #include <iostream>
 
+#define M_PI       3.14159265358979323846
+#define M_PI_2     1.57079632679489661923   // pi/2
+
 const float Drone::DEFAULT_HEALTH = 30.0;
 const float Drone::MOVE_SPEED = 3.0;				// in meters per second
 
@@ -125,9 +128,6 @@ void Drone::controlGroundIntersection()
 
 void Drone::controlDeath()
 {
-	const float EXPLODE_REF_DIST = 25.0;
-	const float EXPLODE_MAX_DIST = FLT_MAX;
-
 	// detectou destruicao do drone
 	if(health <= 0.0 && alive)
 	{

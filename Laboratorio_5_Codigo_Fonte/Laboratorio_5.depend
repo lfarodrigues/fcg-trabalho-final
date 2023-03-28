@@ -1158,7 +1158,7 @@
 	<iostream>
 	<string>
 
-1678028808 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\world\world.h
+1679857116 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\world\world.h
 	"glm/glm.hpp"
 	"inttypes.h"
 	<string>
@@ -1952,7 +1952,10 @@
 
 1678627064 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\loadmesh.cpp
 
-1678566711 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\loadmesh.h
+1678627101 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\loadmesh.h
+	"tiny_obj_loader.h"
+	<iostream>
+	<string>
 
 1678030646 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\loadtexture.cpp
 	"loadtexture.h"
@@ -2188,10 +2191,12 @@
 
 1677962677 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\include\glm\gtc\matrix_inverse.inl
 
-1678631080 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\world\world.cpp
+1679857254 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\world\world.cpp
 	"world.h"
 	"terrain.h"
 	"../objects/player.h"
+	"../objects/drone.h"
+	"../objects/dronemanager.h"
 	"../util/lodepng.h"
 	"stb_image.h"
 	"GLFW/glfw3.h"
@@ -2203,7 +2208,7 @@
 	<vector>
 	<string>
 
-1678631090 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\player.h
+1679856078 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\player.h
 	"glad/glad.h"
 	"glm/glm.hpp"
 
@@ -2228,4 +2233,76 @@
 	<ctime>
 	<cassert>
 	<cmath>
+
+1679857549 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\player.cpp
+	"player.h"
+	"../world/world.h"
+	"../util/shader.h"
+	"../util/loadmesh.h"
+	"../util/loadtexture.h"
+	"tiny_obj_loader.h"
+	<iostream>
+	<string>
+	"glad/glad.h"
+	"GLFW/glfw3.h"
+	"glm/glm.hpp"
+	"glm/gtc/random.hpp"
+	"glm/gtc/type_ptr.hpp"
+	"glm/gtc/matrix_inverse.hpp"
+	"glm/gtc/matrix_transform.hpp"
+	"glm/gtx/rotate_vector.hpp"
+
+1679766669 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\object.cpp
+	"object.h"
+	"glm/glm.hpp"
+
+1679766669 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\object.h
+	"glm/glm.hpp"
+
+1679769075 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\glmmodel.cpp
+	"glmmodel.h"
+	"glad/glad.h"
+	<cstdio>
+	<cstdlib>
+	<string>
+	<cstring>
+	<vector>
+	<iostream>
+
+1679769066 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\glmmodel.h
+	"glad/glad.h"
+	<math.h>
+	<assert.h>
+
+1679770664 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\drone.cpp
+	"drone.h"
+	"../world/world.h"
+	"glm/glm.hpp"
+	"glm/gtc/random.hpp"
+	"glm/gtx/rotate_vector.hpp"
+	<iostream>
+
+1679766669 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\drone.h
+	"object.h"
+	"glm/glm.hpp"
+
+1679769488 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\dronemanager.cpp
+	"dronemanager.h"
+	"drone.h"
+	"../util/glmmodel.h"
+	"../util/shader.h"
+	"../util/loadtexture.h"
+	"../world/world.h"
+	"glad/glad.h"
+	"glm/glm.hpp"
+	"glm/gtc/random.hpp"
+	"glm/gtc/matrix_transform.hpp"
+	"glm/gtc/matrix_inverse.hpp"
+	"glm/gtc/type_ptr.hpp"
+	<cstdlib>
+	<iostream>
+
+1679769488 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\dronemanager.h
+	"glad/glad.h"
+	"glm/glm.hpp"
 

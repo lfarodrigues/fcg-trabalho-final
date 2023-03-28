@@ -9,6 +9,7 @@
 class GLFWwindow;
 class Terrain;
 class Player;
+class DroneManager;
 
 class World{
 private:
@@ -16,6 +17,7 @@ private:
     GLFWwindow *window;
     Terrain *terrain;
     glm::vec2 worldSize;
+	static const float BULLET_RANGE;    // quao longe deve viajar a bala
 
     //numero de itens que foram removidos do jogo
     int numGarbageItems;
@@ -23,6 +25,8 @@ private:
     //player
     Player *player;
 
+    //drones
+    DroneManager *drones;
     //variáveis de controle
     bool gameDone;
 
@@ -33,6 +37,9 @@ private:
     //ortographic matrix for hud
 
     //métodos
+
+    //insere um drone no mundo
+    void addDrone(glm::vec3 pos);
 
     //inicializa o mundo baseado num arquivo
     void createWorld(std::string worldFile);
@@ -68,7 +75,7 @@ public:
     float getTerrainHeight(glm::vec3 pos);
 
     //
-
+    void fireBullet(glm::vec3 bulletStart, glm::vec3 bulletDir);
 
     //permite o término do loop principal
     bool isGameDone();

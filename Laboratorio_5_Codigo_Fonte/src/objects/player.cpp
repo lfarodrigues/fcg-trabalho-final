@@ -23,8 +23,10 @@
 
 
 const float Player::PLAYER_HEIGHT = 1.7; // o quanto a camera esta acima do chao
-
 const float Player::MAX_LOOK_PITCH = M_PI_2 - 0.2;
+const float Player::GUN_RECOIL_ANIM_TIME = 0.25;		// length of the gun recoil animation in seconds
+const float Player::DEATH_IMPACT_ANIM_TIME = 0.5;		// length of the player impact animation in seconds
+const int Player::MAX_ROUNDS_PER_CLIP = 12;				// how many bullets can we fire before reloading?
 
 struct ObjModel;
 
@@ -42,6 +44,24 @@ Player::Player(GLFWwindow *window, World *world, glm::vec3 pos){
     targetLookAngleY = 0.0;
     lookAngleX = 0.0;
     lookAngleY = 0.0;
+
+    gunWalkBob = 0.0;
+    gunWalkBobAmount = 0.0;
+
+    triggerPressed = false;
+    gunRecoilFinished = false;
+
+    gunRecoilTimer = GUN_RECOIL_ANIM_TIME;
+    gunRecoilAmount = 0.0;
+
+    deathImpactTimer = 0.0;
+    deathImpactAmount = 0.0;
+
+    numShotsInClip = MAX_ROUNDS_PER_CLIP;
+
+    gunReloadState = STATE_LOADED;
+	gunReloadTimer = 0.0;
+	gunReloadOffsetAmount = 0.0;
 
     alive = true;
 
@@ -125,10 +145,10 @@ void Player::loadGunAndSetupVBOs(){
         */
     }
 
-    glGenBuffers(4, vbos);
-    //GLuint VBO_model_coefficients_id;
-    //glGenBuffers(1, &VBO_model_coefficients_id);
-    glBindBuffer(GL_ARRAY_BUFFER, vbos[0]);
+    //glGenBuffers(4, vbos);
+    GLuint VBO_model_coefficients_id;
+    glGenBuffers(1, &VBO_model_coefficients_id);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_model_coefficients_id);
     glBufferData(GL_ARRAY_BUFFER, model_coefficients.size() * sizeof(float), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, model_coefficients.size() * sizeof(float), model_coefficients.data());
     GLuint location = 0;
@@ -139,13 +159,13 @@ void Player::loadGunAndSetupVBOs(){
 
     if ( !normal_coefficients.empty() )
     {
-        //GLuint VBO_normal_coefficients_id;
-        //glGenBuffers(1, &VBO_normal_coefficients_id);
-        glBindBuffer(GL_ARRAY_BUFFER, vbos[1]);
+        GLuint VBO_normal_coefficients_id;
+        glGenBuffers(1, &VBO_normal_coefficients_id);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_normal_coefficients_id);
         glBufferData(GL_ARRAY_BUFFER, normal_coefficients.size() * sizeof(float), NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, normal_coefficients.size() * sizeof(float), normal_coefficients.data());
-        location = 1; // "(location = 1)" em "shader_vertex.glsl"
-        number_of_dimensions = 4; // vec4 em "shader_vertex.glsl"
+        location = 1;
+        number_of_dimensions = 4;
         glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
         glEnableVertexAttribArray(location);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -153,9 +173,9 @@ void Player::loadGunAndSetupVBOs(){
 
     if ( !texture_coefficients.empty() )
     {
-        //GLuint VBO_texture_coefficients_id;
-        //glGenBuffers(1, &VBO_texture_coefficients_id);
-        glBindBuffer(GL_ARRAY_BUFFER, vbos[2]);
+        GLuint VBO_texture_coefficients_id;
+        glGenBuffers(1, &VBO_texture_coefficients_id);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_texture_coefficients_id);
         glBufferData(GL_ARRAY_BUFFER, texture_coefficients.size() * sizeof(float), NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, texture_coefficients.size() * sizeof(float), texture_coefficients.data());
         location = 2; // "(location = 1)" em "shader_vertex.glsl"
@@ -165,10 +185,10 @@ void Player::loadGunAndSetupVBOs(){
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
-    //GLuint indices_id;
-    //glGenBuffers(1, &indices_id);
+    GLuint indices_id;
+    glGenBuffers(1, &indices_id);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbos[3]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(GLuint), indices.data());
 
@@ -209,6 +229,9 @@ void Player::update(float dt){
         controlMouseInput(dt);
         computeWalkingVectors();
         controlMoving(dt);
+        controlGunBobbing(dt);
+		controlGunRecoil(dt);
+		controlGunReloading(dt);
     }
     controlLooking(dt);
 }
@@ -282,14 +305,15 @@ void Player::controlMouseInput(float dt){
 }
 
 void Player::controlMoving(float dt) {
-    const float MOVE_SPEED = 100.0;					// velocidade padrao 6.7 m/s
+    const float MOVE_SPEED = 6.7;					// velocidade padrao 6.7 m/s
 
     const float GRAVITY_STRENGTH = 9.81;            // forca da gravidade
     const float JUMP_ACCEL_TIME = 0.10;				// aceleracao do pulo
 	const float JUMP_STRENGTH = 60.0;				// aceleracao maxima do pulo
+    const float GUN_INACCURACY = 0.0025;
 
     glm::vec3 targetVelocity;					    // quao rapido queremos se mover
-
+    glm::vec3 bulletDir;                            // direcao em que disparamos balas
 	isMoving = false;
 
 	if(glfwGetKey(window, 'W') == GLFW_PRESS || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT))
@@ -319,6 +343,40 @@ void Player::controlMoving(float dt) {
     if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && touchingGround)
 	{
 		jumpTimer = JUMP_ACCEL_TIME;
+	}
+	// botao esquerdo dispara a arma
+	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && gunReloadState == STATE_LOADED)
+	{
+	    // so podemos atirar de novo se ja liberamos o gatilho e a animacao de recuo terminou
+		if(!triggerPressed && gunRecoilFinished)
+		{
+			if(numShotsInClip > 0)
+			{
+				gunRecoilTimer = 0.0;
+				triggerPressed = true;
+				numShotsInClip --;
+
+				// compute the bullet direction and fire
+				bulletDir = normalize(cameraForward + linearRand(glm::vec3(-GUN_INACCURACY), glm::vec3(GUN_INACCURACY)));
+				world->fireBullet(pos, bulletDir);
+				//world->addParticle(muzzleFlash, gunPos + pos + (cameraForward * 0.15f) + (cameraUp * 0.065f));
+			}
+			else
+			{
+				gunReloadState = STATE_START_MOVING_DOWN;
+			}
+		}
+	}
+	else
+	{
+		triggerPressed = false;
+	}
+
+	// V ou R recarrega  a arma, mas isso tambem acontece automaticamente
+	if(((glfwGetKey(window, 'V') == GLFW_PRESS || glfwGetKey(window, 'R') == GLFW_PRESS) && gunReloadState == STATE_LOADED && numShotsInClip < MAX_ROUNDS_PER_CLIP) ||
+	   (numShotsInClip == 0 && gunRecoilFinished == true && gunReloadState == STATE_LOADED))
+	{
+		gunReloadState = STATE_START_MOVING_DOWN;
 	}
 
 	if(jumpTimer > 0.0)
@@ -373,6 +431,81 @@ void Player::controlGunBobbing(float dt){
     }
 }
 
+void Player::controlGunRecoil(float dt)
+{
+	const float ALLOW_TRIGGER_PRESS_TIME = GUN_RECOIL_ANIM_TIME * 0.75;
+
+	float recoilFactor;
+
+	gunRecoilTimer += dt;
+	gunRecoilFinished = false;
+
+	if(gunRecoilTimer >= GUN_RECOIL_ANIM_TIME)
+	{
+		gunRecoilTimer = GUN_RECOIL_ANIM_TIME;
+	}
+
+	if(gunRecoilTimer >= ALLOW_TRIGGER_PRESS_TIME)
+	{
+		gunRecoilTimer = GUN_RECOIL_ANIM_TIME;
+		gunRecoilFinished = true;
+	}
+
+	// we use an inverted, long-tailed quadratic equation to model the recoil animation of the gun
+	recoilFactor = gunRecoilTimer / GUN_RECOIL_ANIM_TIME;
+	gunRecoilAmount = -((recoilFactor * recoilFactor) - recoilFactor) * pow(abs(recoilFactor - 1.0), 3);
+}
+
+void Player::controlGunReloading(float dt)
+{
+	const float GUN_RELOAD_MOVE_DOWN_TIME = 0.4;				// how long it takes for the gun to lower for reloading
+	const float GUN_RELOAD_RELOADING_TIME = 0.4;				// how long it takes for the gun to be reloaded when out of sight
+	const float GUN_RELOAD_MOVE_UP_TIME = 0.3;					// how long it takes for the gun to raise into view after reloading
+
+	if(gunReloadState == STATE_START_MOVING_DOWN)
+	{
+		// the gun begins tilting downwards for a reload after ejecting a clip; play the reload sound
+		gunReloadState = STATE_MOVING_DOWN;
+		gunReloadTimer = GUN_RELOAD_MOVE_DOWN_TIME;
+
+	}
+	else if(gunReloadState == STATE_MOVING_DOWN)
+	{
+		// the gun is down, so start the reload timer to simulate the time it takes to load a clip
+		gunReloadOffsetAmount = 1.0 - (gunReloadTimer / GUN_RELOAD_MOVE_DOWN_TIME);
+		gunReloadTimer -= dt;
+		if(gunReloadTimer <= 0.0)
+		{
+			gunReloadState = STATE_RELOADING;
+			gunReloadTimer = GUN_RELOAD_RELOADING_TIME;
+			gunReloadOffsetAmount = 1.0;
+		}
+	}
+	else if(gunReloadState == STATE_RELOADING)
+	{
+		// we wait for the clip to get loaded
+		gunReloadTimer -= dt;
+		if(gunReloadTimer <= 0.0)
+		{
+			gunReloadState = STATE_MOVING_UP;
+			gunReloadTimer = GUN_RELOAD_MOVE_UP_TIME;
+			numShotsInClip = MAX_ROUNDS_PER_CLIP;
+		}
+	}
+	else if(gunReloadState == STATE_MOVING_UP)
+	{
+		// clip is loaded, bring the gun back up
+		gunReloadOffsetAmount = gunReloadTimer / GUN_RELOAD_MOVE_UP_TIME;
+		gunReloadOffsetAmount *= gunReloadOffsetAmount;
+		gunReloadTimer -= dt;
+		if(gunReloadTimer <= 0.0)
+		{
+			gunReloadState = STATE_LOADED;
+			gunReloadOffsetAmount = 0.0;
+		}
+	}
+}
+
 void Player::computeGunPosition(){
     //posicao da arma à extremidade baixo direita do jogador
     const glm::vec3 GUN_BASE_OFFSET(0.2, -0.125, 0.25);
@@ -384,10 +517,10 @@ void Player::computeGunPosition(){
     const float GUN_RELOAD_MOVE_AMOUNT = -0.25;
 
     //computa a posição base da arma e adiciona o efeito de bobbing, recuo e reload
-    gunPos = (cameraForward * GUN_BASE_OFFSET.z) + (cameraSide * GUN_BASE_OFFSET.x) + (cameraUp * GUN_BASE_OFFSET.y);
-    gunPos += (cameraSide * gunWalkBobAmount * GUN_BOB_AMOUNT) - (cameraUp * abs(gunWalkBobAmount) * GUN_BOB_AMOUNT);
-    gunPos += cameraUp * gunRecoilAmount * GUN_RECOIL_MOVE_STRENGTH;
-    gunPos += cameraUp * gunReloadOffsetAmount * GUN_RELOAD_MOVE_AMOUNT;
+	gunPos = (cameraForward * GUN_BASE_OFFSET.z) + (cameraSide * GUN_BASE_OFFSET.x) + (cameraUp * GUN_BASE_OFFSET.y);
+	gunPos += (cameraSide * gunWalkBobAmount * GUN_BOB_AMOUNT) - (cameraUp * abs(gunWalkBobAmount) * GUN_BOB_AMOUNT);
+	gunPos += cameraUp * gunRecoilAmount * GUN_RECOIL_MOVE_STRENGTH;
+	gunPos += cameraUp * gunReloadOffsetAmount * GUN_RELOAD_MOVE_AMOUNT;
 }
 
 void Player::computeWalkingVectors(){

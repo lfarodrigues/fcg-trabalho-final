@@ -30,5 +30,5 @@ void main()
 	vec4 region2Color = (texture(u_Region2Tex, v_BaseTexCoord / 128.0) * 0.75) * region2Contrib + (texture(u_Region2Tex, v_BaseTexCoord / 256.0) * 0.25) * region2Contrib;
 	vec4 region3Color = (texture(u_Region3Tex, v_BaseTexCoord / 128.0) * 0.75) * region3Contrib + (texture(u_Region3Tex, v_BaseTexCoord / 512.0) * 0.25) * region3Contrib;
 
-	f_FragColor = ((region1Color + region2Color + region3Color) * v_Color) * vec4(shadow, shadow, shadow, 0.0);
+	f_FragColor = ((region1Color + region2Color + region3Color) * v_Color);
 }

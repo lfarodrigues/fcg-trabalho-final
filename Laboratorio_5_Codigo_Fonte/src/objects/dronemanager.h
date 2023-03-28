@@ -1,9 +1,9 @@
 #pragma once
 
-#include "GL/glew.h"
+#include "glad/glad.h"
 #include "glm/glm.hpp"
 
-typedef struct ObjModel TObjModel;
+typedef struct _GLMmodel GLMmodel;
 
 class World;
 class Shader;
@@ -16,9 +16,8 @@ private:
 	Shader *bodyShader;					// shader program used when rendering drone body
 	Shader *bladesShader;				// shader program used when rendering drone blades
 
-	TObjModel *droneBodyModel;			// geometry for body
-	TObjModel *droneBladeModel;			// geometry for blades (just four quads at each rotor with a blurred blade texture)
-	TObjModel *droneColliderModel;		// collision geometry for the entire drone
+	GLMmodel *droneBodyModel;			// geometry for body
+	GLMmodel *droneBladeModel;			// geometry for blades (just four quads at each rotor with a blurred blade texture)
 
 	GLuint bodyVAO;						// GL state for rendering body
 	GLuint bodyVBOs[4];					// GL vertex buffer objects for vertex position, tex coords, normals, and instance model matrices
@@ -40,6 +39,7 @@ private:
 	int numDrones;						// number of drones actually present in the game (including ones that have been killed)
 	int numDronesAlive;					// how many drones are still alive
 
+    Drone *drones;						// array of drone objects
 
     void loadModels();					// load resources, self-explanatory
     void loadTextures();

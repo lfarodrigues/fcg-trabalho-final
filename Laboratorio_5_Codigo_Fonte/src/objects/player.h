@@ -19,12 +19,18 @@ private:
     }ReloadState;
 
     float deathImpactTimer;
+    float deathImpactAmount;
+
     bool alive;
     //objetos do mundo importantes
     GLFWwindow *window;             // para entradas do mouse
     World *world;                   // para posicao do sol e elementos do mundo
 
-    static const float MAX_LOOK_PITCH;
+	static const float GUN_RECOIL_ANIM_TIME;		// length of the gun recoil animation in seconds
+	static const float DEATH_IMPACT_ANIM_TIME;		// length of the player impact animation in seconds
+
+	static const float MAX_LOOK_PITCH;				// min and max pitch angle for the camera in radians
+
 
     //orientacao e movimentacao
     glm::vec3 pos;                  // posicao global do jogador
@@ -66,7 +72,7 @@ private:
 
 	int numShotsInClip;						// numero atual de balas no cartucho antes de realizar reload
 
-	ReloadState gunReloadState;				// current state of the gun reloading animation; see the ReloadState enum above
+	ReloadState gunReloadState;				// estado atual da animacao de recarregamento; see the ReloadState enum above
 	float gunReloadTimer;					// timer em segundos para controlar a animacao de reload
 	float gunReloadOffsetAmount;			// controle da animacao da arma
 
@@ -94,7 +100,9 @@ private:
     void controlMoving(float dt);
     void controlGunBobbing(float dt);
 public:
-    static const float PLAYER_HEIGHT;
+	static const float PLAYER_HEIGHT;		// quao alto a camera está do chão
+
+	static const int MAX_ROUNDS_PER_CLIP;	// quantas baladas temos antes de precisar recarregar
 
     Player(GLFWwindow *window, World *world, glm::vec3 pos);
     ~Player();
@@ -106,7 +114,8 @@ public:
     //chamados externamente pelo mundo do jogo
     void computeCameraOrientation();
     void computeGunPosition();
-
+    void controlGunRecoil(float dt);
+    void controlGunReloading(float dt);
 
     //getters/setters
     glm::vec3 getPos();
