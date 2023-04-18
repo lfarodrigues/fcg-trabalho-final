@@ -9,7 +9,7 @@ Projeto
     //code
     src
     |--> objects
-            |--> dino.cpp
+            |--> drone.cpp
     |--> world
             |--> terrain.cpp
             |--> grass.cpp
@@ -18,7 +18,7 @@ Projeto
     //headers
     src
     |--> objects
-            |--> dino.h
+            |--> drone.h
 
     |--> world
             |--> terrain.h

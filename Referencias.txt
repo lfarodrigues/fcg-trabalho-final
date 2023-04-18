@@ -1,0 +1,7 @@
+//Referencias utilizadas no desenvolvimento do trabalho
+Carregamento do mapa apartir de uma imagem(height map) 	  - Livro "Computer Graphics Programming in OpenGL with C++ second edition", capítulo 10 seção 10.3 
+Teste de intersecção						 	  - Livro "Game Programming in C++", capítulo 10 seção LineSegment vs Sphere Test
+Mistura de texturas (diffuse map, specular map, emission map) - Livro "Beginning OpenGL Game Programming, 2nd Edition", capítulo 9
+Animações da arma(recarregamento e recuo)		  		  - Tutoriais na internet
+Instance rendering							  - Tutorial em https://learnopengl.com/Advanced-OpenGL/Instancing			
+ 
