@@ -3,6 +3,7 @@
 #include "../objects/player.h"
 #include "../objects/drone.h"
 #include "../objects/dronemanager.h"
+#include "../objects/cow.h"
 #include "../util/lodepng.h"
 #include "stb_image.h"
 
@@ -57,7 +58,7 @@ void World::createWorld(std::string worldFile){
     const float DRONE_MIN_DIST = 50.0;
 	const int NUM_DRONES = 180;					// quantos drones para inserir no mundo
 
-    unsigned int width, length, channels;       // numero de quadrados que o mundo possui em largura e comprimento
+    unsigned int width, length;                  // numero de quadrados que o mundo possui em largura e comprimento
     unsigned char *data;                        // dados lidos do arquivo de mundo
     unsigned char *dataPtr;
     unsigned char pixelData[4];
@@ -108,6 +109,12 @@ void World::createWorld(std::string worldFile){
             std::cout << "In World::createWorld() - Could not create terrain" << std::endl;
             exit(1);
         }
+        /*cow = new Cow(this);
+        if(cow == NULL)
+        {
+            std::cout << "In World::createWorld() - Could not create cow" << std::endl;
+            exit(1);
+        }*/
     }
     else{
         std::cout << "In World::createWorld() - Could not load world file" << std::endl;
@@ -123,7 +130,14 @@ void World::createPlayer(GLFWwindow *window, glm::vec2 windowSize){
 }
 
 void World::controlCamera(){
-    perspectiveView = glm::lookAt(player->getPos(), player->getCameraLook(), glm::vec3(0.0,1.0,0.0));
+    if(player->getUseLookAt()){
+        glm::vec3 CAMERA_POS_LOOKAT(player->getPos());
+        CAMERA_POS_LOOKAT.y = 10.0;
+
+        perspectiveView = glm::lookAt(CAMERA_POS_LOOKAT, (player->getPos() - CAMERA_POS_LOOKAT), glm::vec3(0.0,1.0,0.0));
+    }else{
+        perspectiveView = glm::lookAt(player->getPos(), player->getCameraLook(), glm::vec3(0.0,1.0,0.0));
+    }
 }
 
 World::~World(){
@@ -139,11 +153,13 @@ void World::update(float dt){
     //atualiza objetos
     player->update(dt);
     drones->update(dt);
+    //cow->update(dt);
     //atualiza posicao da camera e arma
     player->computeCameraOrientation();
     player->computeGunPosition();
 
     controlCamera();
+    controlPlayerDeath();
 }
 
 void World::render(){
@@ -152,6 +168,7 @@ void World::render(){
     terrain->render(perspectiveProjection, perspectiveView, modelMat);
     player->render(perspectiveProjection, perspectiveView);
     drones->render(perspectiveProjection, perspectiveView);
+    //cow->render(perspectiveProjection, perspectiveView);
 }
 
 void World::addDrone(glm::vec3 pos)
@@ -163,18 +180,30 @@ void World::addDrone(glm::vec3 pos)
 
 	// adiciona o drone ao sistema
 	drone = drones -> addDrone(pos);
+	rayCollidables.push_back(drone);
+}
+
+Object *World::getObjectsCollision(glm::vec3 start, glm::vec3 end, glm::vec3 &intersect, float &distance)
+{
+	std::vector<Object*>::iterator i;
+	//glm::vec3 diff;
+
+	Object *curr;
+
+	for(i = rayCollidables.begin(); i != rayCollidables.end(); i ++)
+	{
+		curr = *i;
+		if(curr -> collidesWithRay(start, end, BULLET_RANGE))
+		{
+			curr->flagAsGarbage();
+		}
+	}
+
+	return curr;
 }
 
 void World::fireBullet(glm::vec3 bulletStart, glm::vec3 bulletDir){
- 	const float BULLET_RANGE_SQUARED = BULLET_RANGE * BULLET_RANGE;
-
-	const float BULLET_CYLINDER = 25.0;
-	const float BULLET_CYLINDER_SQUARED = BULLET_CYLINDER * BULLET_CYLINDER;
-
 	glm::vec3 bulletEnd = bulletStart + bulletDir * BULLET_RANGE;
-
-	// update the colliders for any objects that might be hit according to a quick cylinder test
-	//updateRayCollidablesInCylinder(bulletStart, bulletEnd, BULLET_RANGE_SQUARED, BULLET_CYLINDER_SQUARED);
 
 	glm::vec3 terrainIntersect;
 	float terrainDistance;
@@ -184,9 +213,41 @@ void World::fireBullet(glm::vec3 bulletStart, glm::vec3 bulletDir){
 
 	glm::vec3 impactPoint;
 
+    bool terrainCollision = false;
 	//bool terrainCollision = getTerrainCollision(bulletStart, bulletDir, terrainIntersect, terrainDistance);
-	//Object *objectCollision = getObjectsCollision(bulletStart, bulletDir, objectIntersect, objectDistance);
+	Object *objectCollision = getObjectsCollision(bulletStart, bulletEnd, objectIntersect, objectDistance);
 
+	// if both types of collisions occurred, we deal with whichever is closest to the player
+	if(terrainCollision && objectCollision)
+	{
+		if(terrainDistance < objectDistance)
+		{
+			objectCollision = NULL;
+			impactPoint = terrainIntersect;
+		}
+		else
+		{
+			terrainCollision = false;
+			impactPoint = objectIntersect;
+		}
+	}
+	else if(terrainCollision)
+	{
+		impactPoint = terrainIntersect;
+	}
+	else if(objectCollision)
+	{
+		//impactPoint = objectIntersect;
+	}
+
+	// if either occurred, we need to add an impact effect
+	if(terrainCollision || objectCollision)
+	{
+		if(objectCollision)
+		{
+			objectCollision -> handleRayCollision(glm::normalize(objectCollision -> getPos() - bulletStart), glm::vec3(0,0,0));
+		}
+	}
 }
 
 void World::addGarbageItem(){
@@ -194,6 +255,23 @@ void World::addGarbageItem(){
 }
 
 void World::flushGarbage(){
+    std::vector<Object*>::iterator i = rayCollidables.begin();
+	int j = 0;
+
+	while(j < numGarbageItems && i != rayCollidables.end())
+	{
+		if((*i) -> flaggedAsGarbage())
+		{
+			i = rayCollidables.erase(i);        // remove item da lista de colisores
+			j ++;
+		}
+		else
+		{
+			i ++;
+		}
+	}
+
+	numGarbageItems = 0;
 }
 
 float World::getTerrainHeight(glm::vec3 pos){
@@ -202,6 +280,17 @@ float World::getTerrainHeight(glm::vec3 pos){
 
 glm::vec3 World::getPlayerPos(){
     return player->getPos();
+}
+
+void World::controlPlayerDeath() {
+    const float DRONE_DEATH_DIST = 1.0f;
+    if(drones->isDroneCloseTo(player->getPos(), DRONE_DEATH_DIST) && player->isAlive()){
+
+        player->die();
+    }
+    if(!player->isAlive()){
+        gameDone = true;
+    }
 }
 
 bool World::isGameDone(){

@@ -10,6 +10,8 @@ class GLFWwindow;
 class Terrain;
 class Player;
 class DroneManager;
+class Object;
+class Cow;
 
 class World{
 private:
@@ -25,18 +27,25 @@ private:
     //player
     Player *player;
 
+    //vaca
+    Cow *cow;
+
     //drones
     DroneManager *drones;
     //variáveis de controle
     bool gameDone;
 
+    std::vector<Object*> rayCollidables; // lista de objetos que podem ser atirados pelo jogador
+
+
     //matrizes
     glm::mat4 perspectiveProjection; //matriz perspectiva para o jogador
     glm::mat4 perspectiveView;
 
-    //ortographic matrix for hud
-
     //métodos
+    //colisoes
+    bool getTerrainCollision(glm::vec3 bulletStart, glm::vec3 bulletDir, glm::vec3 &intersect, float &distance);
+	Object *getObjectsCollision(glm::vec3 bulletStart, glm::vec3 bulletDir, glm::vec3 &intersect, float &distance);
 
     //insere um drone no mundo
     void addDrone(glm::vec3 pos);
@@ -53,7 +62,8 @@ private:
     //usa a orientação do jogador para determinar para onde a camera deve apontar
     void controlCamera();
 
-
+    //interacao do jogador com outros objetos
+    void controlPlayerDeath();
 
 public:
     static const glm::vec3 SUN_DIRECTION;

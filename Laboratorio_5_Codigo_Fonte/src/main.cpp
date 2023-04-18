@@ -140,7 +140,7 @@ void openWindow(){
 
     //const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-    windowWidth = 800;
+    windowWidth = 1200;
     windowHeight = 600;
 
     window = glfwCreateWindow(windowWidth, windowHeight,
@@ -157,7 +157,7 @@ void openWindow(){
 
     glfwMakeContextCurrent(window);
 
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);

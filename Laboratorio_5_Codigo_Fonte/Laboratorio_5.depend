@@ -1146,7 +1146,7 @@
 	<inttypes.h>
 	<stdint.h>
 
-1678044033 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\main.cpp
+1681804267 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\main.cpp
 	"world/world.h"
 	"glad/glad.h"
 	"GLFW/glfw3.h"
@@ -1158,7 +1158,7 @@
 	<iostream>
 	<string>
 
-1679857116 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\world\world.h
+1681808279 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\world\world.h
 	"glm/glm.hpp"
 	"inttypes.h"
 	<string>
@@ -2191,12 +2191,13 @@
 
 1677962677 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\include\glm\gtc\matrix_inverse.inl
 
-1679857254 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\world\world.cpp
+1681809328 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\world\world.cpp
 	"world.h"
 	"terrain.h"
 	"../objects/player.h"
 	"../objects/drone.h"
 	"../objects/dronemanager.h"
+	"../objects/cow.h"
 	"../util/lodepng.h"
 	"stb_image.h"
 	"GLFW/glfw3.h"
@@ -2208,7 +2209,7 @@
 	<vector>
 	<string>
 
-1679856078 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\player.h
+1681803021 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\player.h
 	"glad/glad.h"
 	"glm/glm.hpp"
 
@@ -2234,7 +2235,7 @@
 	<cassert>
 	<cmath>
 
-1679857549 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\player.cpp
+1681815277 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\player.cpp
 	"player.h"
 	"../world/world.h"
 	"../util/shader.h"
@@ -2252,12 +2253,15 @@
 	"glm/gtc/matrix_transform.hpp"
 	"glm/gtx/rotate_vector.hpp"
 
-1679766669 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\object.cpp
+1681800906 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\object.cpp
+	<iostream>
 	"object.h"
+	"../util/collisions.h"
 	"glm/glm.hpp"
 
-1679766669 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\object.h
+1681735694 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\object.h
 	"glm/glm.hpp"
+	"../util/collisions.h"
 
 1679769075 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\glmmodel.cpp
 	"glmmodel.h"
@@ -2274,19 +2278,20 @@
 	<math.h>
 	<assert.h>
 
-1679770664 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\drone.cpp
+1681774336 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\drone.cpp
 	"drone.h"
 	"../world/world.h"
 	"glm/glm.hpp"
 	"glm/gtc/random.hpp"
 	"glm/gtx/rotate_vector.hpp"
+	"GLFW/glfw3.h"
 	<iostream>
 
 1679766669 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\drone.h
 	"object.h"
 	"glm/glm.hpp"
 
-1679769488 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\dronemanager.cpp
+1681807124 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\dronemanager.cpp
 	"dronemanager.h"
 	"drone.h"
 	"../util/glmmodel.h"
@@ -2302,7 +2307,143 @@
 	<cstdlib>
 	<iostream>
 
-1679769488 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\dronemanager.h
+1681666540 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\dronemanager.h
 	"glad/glad.h"
 	"glm/glm.hpp"
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\base_collision_test.cpp
+	"base_collision_test.h"
+	"math3d.h"
+	<algorithm>
+
+1484133424 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\base_collision_test.h
+	"global.h"
+
+1484133424 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\global.h
+
+1484133424 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\math3d.h
+	<cmath>
+
+1680007577 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\complexcollider.cpp
+	"complexcollider.h"
+	"../util/glmmodel.h"
+	"../util/claudette/collision_model_3d.h"
+	"../util/claudette/ray_collision_test.h"
+	"glm/glm.hpp"
+	"glm/gtc/type_ptr.hpp"
+	<iostream>
+
+1680007586 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\complexcollider.h
+	"../util/claudette/collision_model_3d.h"
+	"glm/glm.hpp"
+
+1484133424 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\collision_model_3d.h
+	"global.h"
+	<cstddef>
+
+1484133424 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\ray_collision_test.h
+	"base_collision_test.h"
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\box.cpp
+	"sysdep.h"
+	"box.h"
+	"mytritri.h"
+
+1680007664 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\sysdep.h
+	<windows.h>
+	<Events.h>
+
+1484133424 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\box.h
+	<cstring>
+	<vector>
+	"math3d.h"
+	"sysdep.h"
+
+1484133424 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\mytritri.h
+	"box.h"
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\box_bld.cpp
+	"sysdep.h"
+	"box.h"
+	<algorithm>
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\collision_model_3d.cpp
+	"collision_model_3d.h"
+	"box.h"
+	"math3d.h"
+	"sysdep.h"
+	"mytritri.h"
+	"model_collision_test.h"
+	"ray_collision_test.h"
+	"sphere_collision_test.h"
+	<algorithm>
+	<cassert>
+	<vector>
+
+1484133424 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\model_collision_test.h
+	"base_collision_test.h"
+
+1484133424 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\sphere_collision_test.h
+	"base_collision_test.h"
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\math3d.cpp
+	"sysdep.h"
+	"math3d.h"
+	<algorithm>
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\model_collision_test.cpp
+	"model_collision_test.h"
+	"mytritri.h"
+	<algorithm>
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\mytritri.cpp
+	"sysdep.h"
+	"mytritri.h"
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\ray_collision_test.cpp
+	"ray_collision_test.h"
+	"math3d.h"
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\sphere_collision_test.cpp
+	"sphere_collision_test.h"
+	"math3d.h"
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\sysdep.cpp
+	"sysdep.h"
+	<sys/time.h>
+
+1484133424 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\claudette\tritri.c
+	<math.h>
+
+1681801851 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\collisions.cpp
+	<iostream>
+	"collisions.h"
+
+1681799438 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\util\collisions.h
+	<math.h>
+	"glm/glm.hpp"
+
+1681803428 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\house.cpp
+
+1681804267 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\housemanager.cpp
+
+1681809480 source:c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\cow.cpp
+	<iostream>
+	"cow.h"
+	"../world/world.h"
+	"../util/shader.h"
+	"../util/glmmodel.h"
+	"glad/glad.h"
+	"GLFW/glfw3.h"
+	"glm/glm.hpp"
+	"glm/gtc/random.hpp"
+	"glm/gtc/type_ptr.hpp"
+	"glm/gtc/matrix_inverse.hpp"
+	"glm/gtc/matrix_transform.hpp"
+	"glm/gtx/rotate_vector.hpp"
+
+1681809170 c:\users\lufi9\documents\programas\cg\fcg_trabalho_final\laboratorio_5_codigo_fonte\src\objects\cow.h
+	"object.h"
+	"glm/glm.hpp"
+	"glad/glad.h"
 

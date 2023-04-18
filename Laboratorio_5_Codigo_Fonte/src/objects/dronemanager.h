@@ -12,6 +12,8 @@ class Drone;
 class DroneManager
 {
 private:
+    static const float DRONE_SPHERE_RADIUS;
+
 	World *world;						// handle to world for collision checks and anything else we need
 	Shader *bodyShader;					// shader program used when rendering drone body
 	Shader *bladesShader;				// shader program used when rendering drone blades
@@ -40,6 +42,9 @@ private:
 	int numDronesAlive;					// how many drones are still alive
 
     Drone *drones;						// array of drone objects
+	float *cylinderTestTimers;
+
+    void initTemporalPartitioning();
 
     void loadModels();					// load resources, self-explanatory
     void loadTextures();

@@ -59,6 +59,8 @@ private:
     glm::vec3 cameraSide;
     glm::vec3 cameraUp;
     glm::vec3 cameraLook;
+    bool useLookAt;
+    float dtAcum;
 
     //arma
     float gunWalkBob;						// used to time the gun bob effect
@@ -126,7 +128,7 @@ public:
     glm::vec3 getCameraUp();
 
     bool getIsMoving();
-
+    bool getUseLookAt();
     void die();
     bool isAlive();
 };

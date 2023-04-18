@@ -6,6 +6,8 @@
 #include "glm/gtc/random.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 
+#include "GLFW/glfw3.h"
+
 #include <iostream>
 
 #define M_PI       3.14159265358979323846
@@ -45,6 +47,7 @@ void Drone::update(float dt)
 
 void Drone::moveTowardsPlayer(float dt)
 {
+    float t = 0.0f;
 	const float TILT_ANGLE = -M_PI / 16.0f;
 	const float UPDATE_ORIENTATION_DISTANCE = 500.0;		// perto o suficiente para o player enxergar o drone
 
@@ -57,34 +60,40 @@ void Drone::moveTowardsPlayer(float dt)
 	glm::vec3 forward, up, side;
 
     // apenas movimentamos em direcao ao jogador se ainda estiver vivo, caso contrario movemos para frente
-	if(world->isPlayerAlive())
-	{
-		// posicao do drone e posicao do jogador
-		player = world->getPlayerPos() + DRONE_TARGET_ADJUSTMENT;
+    if(world->isPlayerAlive())
+    {
+        // posicao do drone e posicao do jogador
+        player = world->getPlayerPos() + DRONE_TARGET_ADJUSTMENT;
 
-		// computa um vetor em direcao ao jogador
-		offset = player - pos;
-		distanceToPlayer = glm::length(offset);
-		velocity = (offset / distanceToPlayer) * MOVE_SPEED * dt;
+        // computa um vetor em direcao ao jogador
+        offset = player - pos;
+        distanceToPlayer = glm::length(offset);
+        velocity = (offset / distanceToPlayer) * MOVE_SPEED * dt;
 
         // apenas atualiza a orientacao do drone se o jogador esta perto o suficiente para ve-lo
-		if(distanceToPlayer < UPDATE_ORIENTATION_DISTANCE)
-		{
-			forward = glm::normalize(glm::vec3(velocity.x, 0.0f, velocity.z));
-			up = glm::vec3(0.0, 1.0, 0.0);
-			side = glm::cross(forward, up);
-			up = glm::rotate(up, TILT_ANGLE, side);
-			forward = glm::rotate(forward, TILT_ANGLE, side);
+        if(distanceToPlayer < UPDATE_ORIENTATION_DISTANCE)
+        {
+            forward = glm::normalize(glm::vec3(velocity.x, 0.0f, velocity.z));
+            up = glm::vec3(0.0, 1.0, 0.0);
+            side = glm::cross(forward, up);
+            up = glm::rotate(up, TILT_ANGLE, side);
+            forward = glm::rotate(forward, TILT_ANGLE, side);
 
-			// re-orienta em direcao ao jogador
-			setUp(up);
-			setSide(side);
-			setForward(forward);
-		}
+            // re-orienta em direcao ao jogador
+            setUp(up);
+            setSide(side);
+            setForward(forward);
+        }
     }
-
     // sempre movimenta para frente
-    setPos(pos + velocity);
+    pos = pos + velocity;
+
+    pos = BezierCurve((float)glfwGetTime()/2 - floor((float)glfwGetTime()/2),  glm::vec3(pos.x-0.08f, pos.y, pos.z), glm::vec3(pos.x-0.04f,pos.y,pos.z+0.05f),
+                  glm::vec3(pos.x+0.04f, pos.y, pos.z-0.05f), glm::vec3(pos.x+0.08f,pos.y,pos.z));
+
+    setPos(pos);
+
+
 }
 
 void Drone::controlImpactMotion(float dt)
@@ -128,12 +137,11 @@ void Drone::controlGroundIntersection()
 
 void Drone::controlDeath()
 {
-	// detectou destruicao do drone
+	// destruicao do drone
 	if(health <= 0.0 && alive)
 	{
 		// grava isso
 		alive = false;
-
 		// explode!
 		explode();
 
@@ -150,10 +158,12 @@ bool Drone::getAlive()
 
 void Drone::handleRayCollision(glm::vec3 dir, glm::vec3 pos)
 {
-	const float RAY_COLLISION_DAMAGE = 11.0;
+	//const float RAY_COLLISION_DAMAGE = 11.0;
 
-	impactMotion += dir * 15.0f;
-	health -= RAY_COLLISION_DAMAGE;
+	//impactMotion += dir * 15.0f;
+	//health -= RAY_COLLISION_DAMAGE;
+	printf("\nShot instance: %p\n at pos = (%f, %f, %f)", this, this->getPos().x, this->getPos().y, this->getPos().z);
+	health = 0.0;
 }
 
 void Drone::explode()

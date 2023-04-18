@@ -19,6 +19,8 @@ using namespace glm;
 #include <iostream>
 using namespace std;
 
+const float DroneManager::DRONE_SPHERE_RADIUS = 50.0;
+
 DroneManager::DroneManager(World *world, int maxDrones)
 {
 	this -> world = world;
@@ -106,12 +108,6 @@ void DroneManager::loadModels()
 		glVertexAttribDivisor(5, 1);
 		glVertexAttribDivisor(6, 1);
 	}
-
-	/*droneColliderModel = glmReadOBJ((char*)"../mesh/drone-collider.obj");
-	if(droneColliderModel)
-	{
-		glmScale(droneColliderModel, 1.0);
-	}*/
 }
 
 void DroneManager::loadTextures()
@@ -125,9 +121,6 @@ void DroneManager::loadTextures()
 
 void DroneManager::loadShader()
 {
-	// note to self: the drone lighting is probably not correct (in terms of orientation) due
-	// to the fact that we don't pass in the normal matrix in a per-instance manner like we
-	// should (see DroneManager::render() for more on this)
 	bodyShader = new Shader("../../shaders/solid-instanced.vert", "../../shaders/solid.frag");
 	bodyShader -> bindAttrib("a_Vertex", 0);
 	bodyShader -> bindAttrib("a_Normal", 1);
@@ -169,6 +162,8 @@ Drone *DroneManager::addDrone(vec3 pos)
 		drones[numDrones] = Drone(world, pos);
 		result = &drones[numDrones];
 
+        result->setSphereCollider(pos, DRONE_SPHERE_RADIUS); // seta a esfera de colisao com centro e raio
+
 		numDrones ++;
 	}
 	else
@@ -186,7 +181,6 @@ void DroneManager::update(float dt)
 
 	mat4 *modelMatPtr;
 	vec3 pos;
-	vec3 newPos;
 	int i;
 
 	modelMatPtr = modelMats;
@@ -196,12 +190,16 @@ void DroneManager::update(float dt)
 		if(curr -> getAlive())
 		{
 			curr -> update(dt);
-			pos = curr -> getPos();
+			pos = curr -> getPos();             // atualiza posicao do drone
+
+			curr -> setSphereCollider(pos, curr->getSphereCollider()->mRadius); // atualiza posicao da esfera
 
             //salva a matriz de modelagem para renderizar mais tarde
 			curr -> getModelMat(modelMatPtr);
 			modelMatPtr++;
 			numDronesAlive ++;
+		} else {
+
 		}
 		curr ++;
 	}
@@ -296,6 +294,10 @@ bool DroneManager::isDroneCloseTo(vec3 pos, float distance)
 			distSquared = (dronePos.x - pos.x) * (dronePos.x - pos.x) +
 						  (dronePos.y - pos.y) * (dronePos.y - pos.y) +
 						  (dronePos.z - pos.z) * (dronePos.z - pos.z);
+			if(distSquared < DIST_SQUARED)
+            {
+                printf("\nDied by instance: %p at pos = (%f, %f, %f)\n", curr, curr->getPos().x, curr->getPos().y, curr->getPos().z);
+            }
 			result = distSquared < DIST_SQUARED;
 		}
 		curr ++;

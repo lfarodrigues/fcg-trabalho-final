@@ -18,9 +18,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/rotate_vector.hpp"
 
-
 #define M_PI_2     1.57079632679489661923   // pi/2
-
 
 const float Player::PLAYER_HEIGHT = 1.7; // o quanto a camera esta acima do chao
 const float Player::MAX_LOOK_PITCH = M_PI_2 - 0.2;
@@ -64,7 +62,8 @@ Player::Player(GLFWwindow *window, World *world, glm::vec3 pos){
 	gunReloadOffsetAmount = 0.0;
 
     alive = true;
-
+    useLookAt = false;
+    dtAcum = 0.0;
     //carrega os assets
     loadGunAndSetupVBOs();
     loadTextures();
@@ -131,18 +130,6 @@ void Player::loadGunAndSetupVBOs(){
                 }
             }
         }
-        /*
-        size_t last_index = indices.size() - 1;
-
-        SceneObject theobject;
-        theobject.name           = model.shapes[shape].name;
-        theobject.first_index    = first_index; // Primeiro índice
-        theobject.num_indices    = last_index - first_index + 1; // Número de indices
-        theobject.rendering_mode = GL_TRIANGLES;       // Índices correspondem ao tipo de rasterização GL_TRIANGLES.
-        theobject.vertex_array_object_id = vertex_array_object_id;
-
-        g_VirtualScene[model.shapes[shape].name] = theobject;
-        */
     }
 
     //glGenBuffers(4, vbos);
@@ -236,7 +223,6 @@ void Player::update(float dt){
     controlLooking(dt);
 }
 
-//TODO
 void Player::render(glm::mat4 &projection, glm::mat4 &view){
     const glm::vec3 GUN_SIZE(-0.225, 0.225, 0.225);
 	const float GUN_RECOIL_ROTATE_STRENGTH = -4.0;  // recuo da arma
@@ -316,6 +302,8 @@ void Player::controlMoving(float dt) {
     glm::vec3 bulletDir;                            // direcao em que disparamos balas
 	isMoving = false;
 
+    dtAcum = dtAcum + dt;
+
 	if(glfwGetKey(window, 'W') == GLFW_PRESS || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT))
 	{
 		targetVelocity += glm::vec3(0.0, 0.0, MOVE_SPEED);
@@ -343,6 +331,14 @@ void Player::controlMoving(float dt) {
     if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && touchingGround)
 	{
 		jumpTimer = JUMP_ACCEL_TIME;
+	}
+	if(glfwGetKey(window, 'L') == GLFW_PRESS){
+        if (dtAcum >= 1.0){
+            if(useLookAt)
+                useLookAt = false;
+            else
+                useLookAt = true;
+        }
 	}
 	// botao esquerdo dispara a arma
 	if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && gunReloadState == STATE_LOADED)
@@ -548,6 +544,10 @@ glm::vec3 Player::getCameraUp(){
 
 bool Player::getIsMoving(){
     return isMoving;
+}
+
+bool Player::getUseLookAt(){
+    return useLookAt;
 }
 void Player::die()
 {

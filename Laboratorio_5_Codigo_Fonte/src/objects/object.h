@@ -1,6 +1,10 @@
 #pragma once
 
 #include "glm/glm.hpp"
+#include "../util/collisions.h"
+
+typedef struct Sphere Sphere;
+typedef struct LineSegment LineSegment;
 
 class Object
 {
@@ -11,6 +15,7 @@ private:
 	glm::vec3 up;							// vetor de cima
 	glm::mat4 modelMat;						// matriz de modelagem (sem incluir escala) composta dos 4 vetores acima
 
+    Sphere *sphereCollider;
 	bool garbage;							// podemos remover o objeto do jogo?
 
 public:
@@ -35,4 +40,14 @@ public:
     void setModelMat(glm::mat4 &mat);						// manually sets the object's model matrix
     void computeModelMat();									// computa a matriz de modelagem baseado nos valores dos vetore pos, forward, side e up
     void getModelMat(glm::mat4 *mat);						// retorna uma copia da matriz de modelagem computada
+
+    void setSphereCollider(glm::vec3 pos, float radius);
+    Sphere* getSphereCollider();
+    //determina se um objeto foi atingido por um raio e onde
+	bool collidesWithRay(glm::vec3 &start, glm::vec3 &dir, float length);
+
+    glm::vec3 BezierCurve(float t, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4);
+
+    virtual void handleRayCollision(glm::vec3 dir, glm::vec3 point);
+
 };
